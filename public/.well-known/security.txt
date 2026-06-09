@@ -1,0 +1,3 @@
+Contact: https://github.com/lunynt
+Preferred-Languages: en
+Canonical: https://lunynt.lol/.well-known/security.txt

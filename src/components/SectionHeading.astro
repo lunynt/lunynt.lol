@@ -1,0 +1,28 @@
+---
+interface Props {
+  id: string;
+  label: string;
+}
+
+const { id, label } = Astro.props;
+---
+
+<div class="flex items-center gap-2 mb-4 lg:mb-6">
+  <button class="section-hash font-mono text-white/20 hover:text-white/60 transition-colors select-none" data-section={id} title="copy link">#</button>
+  <h2 class="section-label text-base sm:text-lg lg:text-xl font-semibold text-white">{label}</h2>
+</div>
+
+<style>
+  .section-label {
+    transition: opacity 0.15s ease;
+  }
+
+  .section-label.fading {
+    opacity: 0;
+  }
+</style>
+
+<script>
+  import { initSectionHeadings } from '../scripts/sectionHeading';
+  initSectionHeadings();
+</script>

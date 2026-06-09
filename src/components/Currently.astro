@@ -1,0 +1,18 @@
+<div id="currently-content" class="currently-content flex flex-col gap-3">
+  <p class="currently-empty text-xs text-white/40">connecting to discord...</p>
+</div>
+
+<a
+  href="https://lanyard.rest"
+  target="_blank"
+  rel="noopener noreferrer"
+  class="mt-3 inline-block text-[10px] text-white/20 hover:text-white/40 transition-colors"
+>
+  live data via lanyard.rest
+</a>
+
+<script>
+  import { initLanyard } from '../scripts/lanyard';
+  import { user } from '../config';
+  initLanyard(user.discord.userId);
+</script>

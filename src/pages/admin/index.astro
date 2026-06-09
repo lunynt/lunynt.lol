@@ -1,0 +1,96 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { requireAdmin } from '../../lib/auth';
+
+export const prerender = false;
+
+const session = await requireAdmin(Astro.cookies);
+
+const inputClasses = 'w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/25 transition-colors';
+const buttonClasses = 'shrink-0 rounded-lg bg-white/10 hover:bg-white/15 px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed';
+const cardClasses = 'relative z-10 w-full rounded-2xl backdrop-blur-md bg-white/10 shadow-xl px-5 sm:px-8 lg:px-10 py-5 sm:py-7 lg:py-9';
+---
+
+<Layout title="admin - lunynt.lol">
+  <div class="relative flex flex-col items-center gap-4 px-4 py-10 sm:px-8 sm:py-14 lg:px-12 lg:py-16 min-h-screen">
+
+    {!session && (
+      <div class={`${cardClasses} max-w-sm`}>
+        <h1 class="text-lg font-semibold text-white mb-4">admin login</h1>
+        <form id="admin-login-form" class="flex flex-col gap-3">
+          <input type="text" name="username" placeholder="username" autocomplete="username" required class={inputClasses} />
+          <input type="password" name="password" placeholder="password" autocomplete="current-password" required class={inputClasses} />
+          <button type="submit" class={buttonClasses}>log in</button>
+          <p class="admin-form-error hidden text-xs text-red-400/80"></p>
+        </form>
+      </div>
+    )}
+
+    {session && (
+      <div id="admin-dashboard" class="w-full max-w-3xl xl:max-w-5xl flex flex-col gap-4" data-username={session.username}>
+
+        <div class={`${cardClasses} flex items-center justify-between gap-4`}>
+          <div>
+            <p class="text-xs text-white/40">logged in as</p>
+            <p class="text-base font-semibold text-white">{session.username}</p>
+          </div>
+          <button id="admin-logout" class={buttonClasses}>log out</button>
+        </div>
+
+        <div class={cardClasses}>
+          <h2 class="text-base font-semibold text-white mb-4">guestbook status</h2>
+          <div id="admin-status" class="flex flex-col sm:flex-row sm:items-center gap-3">
+            <p class="admin-status-text text-sm text-white/50">loading...</p>
+            <button id="admin-status-toggle" class={`${buttonClasses} sm:ml-auto`} disabled>toggle</button>
+          </div>
+        </div>
+
+        <div class={cardClasses}>
+          <h2 class="text-base font-semibold text-white mb-4">change password</h2>
+          <form id="admin-password-form" class="flex flex-col gap-3 max-w-sm">
+            <input type="password" name="currentPassword" placeholder="current password" autocomplete="current-password" required class={inputClasses} />
+            <input type="password" name="newPassword" placeholder="new password (min 8 chars)" autocomplete="new-password" required minlength="8" class={inputClasses} />
+            <button type="submit" class={`${buttonClasses} self-start`}>update password</button>
+            <p class="admin-form-error hidden text-xs text-red-400/80"></p>
+            <p class="admin-form-success hidden text-xs text-emerald-400/80"></p>
+          </form>
+        </div>
+
+        <div class={cardClasses}>
+          <h2 class="text-base font-semibold text-white mb-4">blocked ips</h2>
+          <form id="admin-block-form" class="flex flex-col sm:flex-row gap-3 mb-4">
+            <input type="text" name="ip" placeholder="ip address" required class={inputClasses} />
+            <input type="text" name="reason" placeholder="reason (optional)" class={inputClasses} />
+            <button type="submit" class={`${buttonClasses} sm:shrink-0`}>block</button>
+          </form>
+          <div id="admin-blocked-list" class="flex flex-col gap-2">
+            <p class="text-xs text-white/40">loading...</p>
+          </div>
+        </div>
+
+        <div class={cardClasses}>
+          <h2 class="text-base font-semibold text-white mb-4">guestbook entries</h2>
+          <div id="admin-entries" class="flex flex-col gap-3">
+            <p class="text-xs text-white/40">loading...</p>
+          </div>
+        </div>
+
+      </div>
+    )}
+
+  </div>
+</Layout>
+
+{session && (
+  <script>
+    import { initAdminDashboard } from '../../scripts/admin';
+    initAdminDashboard();
+  </script>
+)}
+
+{!session && (
+  <script>
+    import { initAdminLogin } from '../../scripts/admin';
+    initAdminLogin();
+  </script>
+)}

@@ -1,0 +1,49 @@
+---
+interface Props {
+  src: string;
+}
+
+const { src } = Astro.props;
+
+const TILE_TRANSFORMS = [
+  'scaleX(-1) scaleY(-1)', 'scaleY(-1)',  'scaleX(-1) scaleY(-1)',
+  'scaleX(-1)',             'none',         'scaleX(-1)',
+  'scaleX(-1) scaleY(-1)', 'scaleY(-1)',  'scaleX(-1) scaleY(-1)',
+];
+---
+
+<div id="banner-container" class="relative z-0 h-36 sm:h-44 lg:h-64 select-none">
+  <div id="banner-grid">
+    {TILE_TRANSFORMS.map((t) => (
+      <div class="banner-tile" style={`background-image:url('${src}');transform:${t};`} />
+    ))}
+  </div>
+</div>
+
+<style>
+  #banner-container {
+    contain: paint;
+  }
+
+  #banner-grid {
+    position: absolute;
+    width: 300%;
+    height: 300%;
+    top: -100%;
+    left: -100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    will-change: transform;
+  }
+
+  .banner-tile {
+    background-size: cover;
+    background-position: center;
+  }
+</style>
+
+<script>
+  import { initBanner } from '../scripts/banner';
+  initBanner();
+</script>

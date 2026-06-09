@@ -1,0 +1,13 @@
+---
+const DIGITS = 6;
+---
+
+<div id="site-counter" class="flex items-center gap-3 text-white/30 text-sm">
+  <span>visitors</span>
+  <div id="site-counter-digits" class="flex items-center gap-0.5" data-digits={DIGITS}></div>
+</div>
+
+<script>
+  import { initCounter } from '../scripts/counter';
+  initCounter();
+</script>

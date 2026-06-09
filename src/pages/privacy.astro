@@ -1,0 +1,41 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { pages } from '../config';
+
+const cardClasses = 'relative z-10 w-full max-w-sm sm:max-w-xl lg:max-w-2xl rounded-2xl backdrop-blur-md bg-white/10 shadow-xl px-5 sm:px-8 lg:px-10 py-5 sm:py-7 lg:py-9';
+const headingClasses = 'text-base font-semibold text-white mb-2 mt-6 first:mt-0';
+const textClasses = 'text-sm text-white/50 leading-relaxed';
+const listClasses = 'list-disc list-outside pl-5 text-sm text-white/50 leading-relaxed flex flex-col gap-1';
+---
+
+<Layout title={pages.privacy.title} description={pages.privacy.description}>
+  <div class="relative flex flex-col items-center gap-4 px-4 py-10 sm:px-8 sm:py-14 lg:px-12 lg:py-16 min-h-screen">
+    <div class={cardClasses}>
+      <h1 class="text-lg font-semibold text-white mb-1">privacy</h1>
+      <p class={textClasses}>a plain-language rundown of what this site collects, why, and for how long. no trackers, no analytics, no ad networks, just what's needed to keep the guestbook usable.</p>
+
+      <h2 class={headingClasses}>guestbook</h2>
+      <p class={textClasses}>when you sign the guestbook, the name, website, and message you enter are shown publicly. alongside that, your ip address is stored privately, it's never shown on the page or sent to your browser, and used only to:</p>
+      <ul class={listClasses}>
+        <li>filter spam and flag suspicious submissions for review</li>
+        <li>detect raids (many submissions from different sources at once) and pause the form automatically</li>
+        <li>let an admin block abusive ips from posting again</li>
+      </ul>
+
+      <h2 class={headingClasses}>likes / dislikes</h2>
+      <p class={textClasses}>voting on a guestbook entry stores your ip address alongside your vote, so the same ip can't vote twice on one entry (you can change your vote after 24 hours). your browser also remembers your own votes locally so the buttons reflect your choice on return visits.</p>
+
+      <h2 class={headingClasses}>site visit counter</h2>
+      <p class={textClasses}>page loads are counted using your ip address with a cooldown window, so refreshing repeatedly doesn't inflate the number. the running total is public; the underlying ip log is only ever visible to the site admin, who can also remove or block specific ips from it.</p>
+
+      <h2 class={headingClasses}>captcha & proxy detection</h2>
+      <p class={textClasses}>guestbook submissions and votes are checked with <a href="https://www.cloudflare.com/products/turnstile/" target="_blank" rel="noopener noreferrer" class="text-white/70 hover:text-white underline underline-offset-2">cloudflare turnstile</a>, and the submitting ip is checked against <a href="https://getipintel.net" target="_blank" rel="noopener noreferrer" class="text-white/70 hover:text-white underline underline-offset-2">getipintel.net</a> to flag likely vpns/proxies. both services receive your ip address directly to perform these checks, see their respective privacy policies for how they handle it.</p>
+
+      <h2 class={headingClasses}>cookies</h2>
+      <p class={textClasses}>the only cookie this site sets is for the admin login (a session cookie), <span class="text-white/70">httpOnly</span> and restricted to <span class="text-white/70">/admin</span> use. nothing is set for visitors, and nothing is used for tracking.</p>
+
+      <h2 class={headingClasses}>questions or removal requests</h2>
+      <p class={textClasses}>want an entry, vote, or logged ip removed? reach out through the contact info on the homepage and it'll get sorted.</p>
+    </div>
+  </div>
+</Layout>

@@ -1,4 +1,5 @@
 import pfp from './assets/pfp.png';
+import banner from './assets/banner.png';
 
 export const site = {
   name: 'lunynt.lol',
@@ -23,8 +24,9 @@ export const pages = {
 export const user = {
   name: 'lunynt',
   pronunciation: 'lun·int',
+  pronunciationHint: '"lun" like "fun", "int" like "tint/hint/mint"',
   pfp,
-  banner: '/banner.png',
+  banner,
   about: `hi, i'm lunynt, and uh... i build free and open-source projects for everyone. most of my projects focus on creating alternatives to paid or closed-source software, proving that great tools don't need a price tag. if that makes a few greedy developers cry, then that's a bonus :p\n\ni believe open-source makes software better. people can contribute, improve things over time, and build something that's better for everyone, without locking it behind a paywall.`,
   projects: [
     'lunynt/lunynt.lol',

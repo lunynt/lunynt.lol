@@ -3,28 +3,16 @@ import { supabaseAdmin } from '../../../../lib/supabaseAdmin';
 import { isIpBlocked } from '../../../../lib/guestbookGuard';
 import { isLikelyProxy } from '../../../../lib/proxyCheck';
 import { jsonResponse } from '../../../../lib/http';
+import { verifyTurnstile } from '../../../../lib/turnstile';
 
 export const prerender = false;
 
-const TURNSTILE_VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 const DUPLICATE_KEY = '23505';
 const REVOTE_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 
 interface VotePayload {
   vote?: number;
   token?: string;
-}
-
-async function verifyTurnstile(token: string, ip: string): Promise<boolean> {
-  const body = new URLSearchParams({
-    secret: import.meta.env.TURNSTILE_SECRET_KEY,
-    response: token,
-    remoteip: ip,
-  });
-
-  const res = await fetch(TURNSTILE_VERIFY_URL, { method: 'POST', body });
-  const result = await res.json();
-  return result.success === true;
 }
 
 export const POST: APIRoute = async ({ params, request, clientAddress }) => {

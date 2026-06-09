@@ -1,6 +1,10 @@
 ---
 import '../styles/global.css';
+import { getImage } from 'astro:assets';
 import { site } from '../config';
+import background from '../assets/background.png';
+
+const bgImage = await getImage({ src: background, format: 'webp' });
 
 interface Props {
   title?: string;
@@ -48,7 +52,7 @@ const canonical = new URL(Astro.url.pathname, site.url).href;
     <link rel="manifest" href="/site.webmanifest" />
     <slot name="head" />
   </head>
-  <body>
+  <body style={`--bg-url: url('${bgImage.src}')`}>
     <slot />
     <script>
       import { initAntiInspect } from '../scripts/antiInspect';

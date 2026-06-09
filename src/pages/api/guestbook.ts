@@ -4,10 +4,10 @@ import { isSpam, isNameBlacklisted } from '../../lib/moderation';
 import { getGuestbookStatus, isIpBlocked, logAttemptAndCheckRaid } from '../../lib/guestbookGuard';
 import { isLikelyProxy } from '../../lib/proxyCheck';
 import { jsonResponse } from '../../lib/http';
+import { verifyTurnstile } from '../../lib/turnstile';
 
 export const prerender = false;
 
-const TURNSTILE_VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 const NAME_MAX = 60;
 const MESSAGE_MAX = 500;
 const WEBSITE_PATTERN = /^https?:\/\//;
@@ -38,18 +38,6 @@ interface GuestbookPayload {
   website?: string;
   message?: string;
   token?: string;
-}
-
-async function verifyTurnstile(token: string, ip: string): Promise<boolean> {
-  const body = new URLSearchParams({
-    secret: import.meta.env.TURNSTILE_SECRET_KEY,
-    response: token,
-    remoteip: ip,
-  });
-
-  const res = await fetch(TURNSTILE_VERIFY_URL, { method: 'POST', body });
-  const result = await res.json();
-  return result.success === true;
 }
 
 export const POST: APIRoute = async ({ request, clientAddress }) => {

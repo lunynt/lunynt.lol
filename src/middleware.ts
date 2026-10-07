@@ -20,7 +20,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   if (path.startsWith("/admin") || path.startsWith("/api/admin")) {
     response.headers.set("x-frame-options", "DENY");
     response.headers.set("x-content-type-options", "nosniff");
-    response.headers.set("referrer-policy", "no-referrer");
+    response.headers.set("referrer-policy", "same-origin");
     response.headers.set("cache-control", "no-store");
     response.headers.set("permissions-policy", "interest-cohort=()");
 

@@ -28,6 +28,20 @@ function squash(value: string): string {
     .replace(/(.)\1+/g, "$1");
 }
 
+export function sanitize(value: string, multiline: boolean): string {
+  const withoutTags = value.replace(/<[^>]*>/g, " ");
+  const control = multiline
+    ? /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g
+    : /[\u0000-\u001f\u007f]/g;
+
+  let text = withoutTags.replace(control, "");
+  text = multiline
+    ? text.replace(/[^\S\n]+/g, " ").replace(/\n{3,}/g, "\n\n")
+    : text.replace(/\s+/g, " ");
+
+  return text.trim();
+}
+
 export function containsBlocked(value: string, blocked: string[]): boolean {
   const words = new Set(leet(value).split(/[^a-z]+/).filter(Boolean));
   if (words.size === 0) {

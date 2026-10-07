@@ -1,0 +1,88 @@
+:host {
+  font-family: var(--font-sans);
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background-color: color-mix(in srgb, var(--color-canvas) 72%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+}
+
+.overlay.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.card {
+  width: min(22rem, 100%);
+  padding: 1.5rem;
+  text-align: center;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-line-strong);
+  border-radius: 1.1rem;
+  transform: translateY(10px) scale(0.97);
+  transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.overlay.is-open .card {
+  transform: none;
+}
+
+.title {
+  color: var(--color-ink);
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.text {
+  margin-top: 0.35rem;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+
+.btn {
+  flex: 1;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid var(--color-line-strong);
+  border-radius: 999px;
+  background-color: transparent;
+  color: var(--color-ink);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    opacity 140ms ease;
+}
+
+.btn:hover {
+  background-color: var(--color-elevated);
+  border-color: var(--color-muted);
+}
+
+.btn.primary {
+  background-color: var(--color-ink);
+  color: var(--color-canvas);
+  border-color: var(--color-ink);
+}
+
+.btn.primary:hover {
+  opacity: 0.9;
+}

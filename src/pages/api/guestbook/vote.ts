@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { databaseUrl, getSql } from "../../../lib/db";
-import { verifyCaptcha } from "../../../lib/captcha";
+import { verifyChallenge } from "../../../lib/challenge";
 import { allow, hashIp } from "../../../lib/rate";
 import {
   createVoterId,
@@ -9,46 +9,23 @@ import {
   voterCookie,
 } from "../../../lib/voter";
 import { isJson, isSameOrigin, isUuid, readJson } from "../../../lib/http";
+import { fail, json } from "../../../lib/api";
 import { guestbook } from "../../../config";
 
 export const prerender = false;
 
-function json(
-  body: unknown,
-  status = 200,
-  setCookie?: string | null,
-): Response {
-  const headers: Record<string, string> = {
-    "content-type": "application/json",
-    "cache-control": "no-store",
-    "x-content-type-options": "nosniff",
-  };
-  if (setCookie) {
-    headers["set-cookie"] = setCookie;
-  }
-  return new Response(JSON.stringify(body), { status, headers });
-}
-
-function clientIp(context: { clientAddress?: string }): string | null {
-  try {
-    return context.clientAddress ?? null;
-  } catch {
-    return null;
-  }
-}
-
 export const POST: APIRoute = async (context) => {
   if (!isSameOrigin(context.request)) {
-    return json({ error: "forbidden" }, 403);
+    return fail(403, "cross-origin request");
   }
 
   if (!isJson(context.request)) {
-    return json({ error: "unsupported media type" }, 415);
+    return fail(415, "expected json body");
   }
 
   const url = databaseUrl();
   if (!guestbook.enabled || !url) {
-    return json({ error: "guestbook unavailable" }, 503);
+    return fail(503, "guestbook disabled");
   }
 
   let voterId = readVoterId(context.request);
@@ -57,47 +34,50 @@ export const POST: APIRoute = async (context) => {
     voterId = createVoterId();
     cookie = voterCookie(voterId, isSecure(context.request));
   }
+  const headers: Record<string, string> = cookie
+    ? { "set-cookie": cookie }
+    : {};
 
   const parsed = await readJson(context.request);
   if (!parsed.ok) {
-    return json({ error: "bad request" }, parsed.status, cookie);
+    return fail(parsed.status, "invalid payload", headers);
   }
 
   const payload = parsed.value as {
     id?: unknown;
     value?: unknown;
-    token?: unknown;
+    captcha?: unknown;
   };
 
   const id = typeof payload.id === "string" ? payload.id : "";
-  const token = typeof payload.token === "string" ? payload.token : "";
+  const captcha = typeof payload.captcha === "string" ? payload.captcha : "";
   const value =
     payload.value === 1 || payload.value === -1 || payload.value === 0
       ? payload.value
       : null;
 
   if (!isUuid(id) || value === null) {
-    return json({ error: "bad request" }, 400, cookie);
+    return fail(400, "invalid vote", headers);
   }
 
-  const ip = clientIp(context);
-  const ipHash = hashIp(ip);
-  const identity = ipHash ?? voterId;
+  let ip: string | null = null;
+  try {
+    ip = context.clientAddress || null;
+  } catch {
+    ip = null;
+  }
 
+  const identity = hashIp(ip) ?? voterId;
   const sql = getSql(url);
-  const allowed = await allow(
-    sql,
-    `vote:${identity}`,
-    guestbook.votesPerMinute,
-    60,
-  );
-  if (!allowed) {
-    return json({ error: "you are voting too fast" }, 429, cookie);
+
+  if (
+    !(await allow(sql, `vote:${identity}`, guestbook.votesPerMinute, 60))
+  ) {
+    return fail(429, "vote rate limit", headers);
   }
 
-  const verified = await verifyCaptcha(token, ip);
-  if (!verified) {
-    return json({ error: "captcha failed, please try again" }, 403, cookie);
+  if (!verifyChallenge(captcha)) {
+    return fail(403, "challenge failed", headers);
   }
 
   try {
@@ -138,11 +118,11 @@ export const POST: APIRoute = async (context) => {
     });
 
     if (!outcome.found) {
-      return json({ error: "entry not found" }, 404, cookie);
+      return fail(404, "entry missing", headers);
     }
 
-    return json({ score: outcome.score, my_vote: value }, 200, cookie);
+    return json({ score: outcome.score, my_vote: value }, 200, headers);
   } catch {
-    return json({ error: "could not save your vote" }, 500, cookie);
+    return fail(500, "vote failed", headers);
   }
 };

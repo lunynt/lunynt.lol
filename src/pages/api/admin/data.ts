@@ -1,28 +1,18 @@
 import type { APIRoute } from "astro";
 import { databaseUrl, getSql } from "../../../lib/db";
 import { isAuthenticated } from "../../../lib/admin";
+import { fail, json } from "../../../lib/api";
 
 export const prerender = false;
 
-function json(body: unknown, status = 200): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: {
-      "content-type": "application/json",
-      "cache-control": "no-store",
-      "x-content-type-options": "nosniff",
-    },
-  });
-}
-
 export const GET: APIRoute = async (context) => {
   if (!isAuthenticated(context.request)) {
-    return json({ error: "unauthorized" }, 401);
+    return fail(401);
   }
 
   const url = databaseUrl();
   if (!url) {
-    return json({ error: "no database" }, 503);
+    return fail(503);
   }
 
   try {
@@ -95,6 +85,6 @@ export const GET: APIRoute = async (context) => {
       entries,
     });
   } catch {
-    return json({ error: "failed" }, 500);
+    return fail(500);
   }
 };

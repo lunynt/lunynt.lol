@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { verifyCaptcha } from "../../../lib/captcha";
+import { verifyChallenge } from "../../../lib/challenge";
 import { databaseUrl, getSql } from "../../../lib/db";
 import { allow, hashIp } from "../../../lib/rate";
 import {
@@ -21,13 +21,13 @@ function clientIp(context: { clientAddress?: string }): string | null {
 export const POST: APIRoute = async (context) => {
   let username = "";
   let password = "";
-  let token = "";
+  let captcha = "";
 
   try {
     const form = await context.request.formData();
     username = String(form.get("username") ?? "");
     password = String(form.get("password") ?? "");
-    token = String(form.get("cf-turnstile-response") ?? "");
+    captcha = String(form.get("captcha") ?? "");
   } catch {
     return context.redirect("/admin/login?error=1", 303);
   }
@@ -37,22 +37,22 @@ export const POST: APIRoute = async (context) => {
   const url = databaseUrl();
   if (url) {
     const sql = getSql(url);
-    const key = hashIp(ip) ?? "unknown";
-    const allowed = await allow(sql, `admin-login:${key}`, 8, 900);
+    const allowed = await allow(
+      sql,
+      `admin-login:${hashIp(ip) ?? "unknown"}`,
+      8,
+      900,
+    );
     if (!allowed) {
-      return context.redirect("/admin/login?error=rate", 303);
+      return context.redirect("/admin/login?error=1", 303);
     }
   }
 
-  const verified = await verifyCaptcha(token, ip);
-  if (!verified) {
-    return context.redirect("/admin/login?error=captcha", 303);
+  if (!verifyChallenge(captcha) || !checkCredentials(username, password)) {
+    return context.redirect("/admin/login?error=1", 303);
   }
 
-  const cookie = checkCredentials(username, password)
-    ? sessionCookie(isSecureRequest(context.request))
-    : null;
-
+  const cookie = sessionCookie(isSecureRequest(context.request));
   if (!cookie) {
     return context.redirect("/admin/login?error=1", 303);
   }

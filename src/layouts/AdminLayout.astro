@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import "../styles/admin.css";
+import Captcha from "../components/Captcha.astro";
 
 interface Props {
   title?: string;
@@ -19,6 +20,7 @@ const { title = "admin" } = Astro.props;
   </head>
   <body class="admin-body">
     <slot />
+    <Captcha />
     <img
       class="cursor"
       data-cursor

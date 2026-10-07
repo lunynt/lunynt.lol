@@ -75,12 +75,20 @@ export const site: SiteConfig = {
   themeColor: "#0a0a0b",
   discordId: "160830289357176832",
   socials: [
-    { label: "github", href: "https://github.com/lunynt", icon: "github" },
-    { label: "telegram", href: "https://t.me/lunynt", icon: "telegram" },
+    {
+      label: "github",
+      href: "https://github.com/lunynt",
+      icon: "simple-icons:github",
+    },
+    {
+      label: "telegram",
+      href: "https://t.me/lunynt",
+      icon: "simple-icons:telegram",
+    },
     {
       label: "discord",
       href: "https://discord.gg/fGepBdxTbw",
-      icon: "discord",
+      icon: "simple-icons:discord",
     },
   ],
 };
@@ -168,5 +176,14 @@ export const guestbook: GuestbookConfig = {
     "bastard",
     "kys",
     "kill yourself",
+    "cuck",
+    "cuckold",
+    "necro",
+    "necrophile",
+    "rape",
+    "rapist",
+    "pedo",
+    "paedo",
+    "pedophile",
   ],
 };

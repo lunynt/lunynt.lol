@@ -1,3 +1,6 @@
+import { ChevronDown, ChevronUp, createElement } from "lucide";
+import { askCaptcha } from "./captcha";
+
 interface Entry {
   id: string;
   name: string;
@@ -9,21 +12,30 @@ interface Entry {
   reply?: string | null;
 }
 
-interface Turnstile {
-  render: (element: HTMLElement, options: Record<string, unknown>) => string;
-  reset: (id?: string) => void;
-  execute: (id?: string) => void;
-}
-
 const form = document.querySelector<HTMLFormElement>("[data-guestbook-form]");
 const list = document.querySelector<HTMLElement>("[data-guestbook-list]");
 const empty = document.querySelector<HTMLElement>("[data-guestbook-empty]");
 const statusEl = document.querySelector<HTMLElement>("[data-guestbook-status]");
-const captcha = document.querySelector<HTMLElement>("[data-turnstile]");
 const counter = document.querySelector<HTMLElement>("[data-guestbook-counter]");
 const messageField = form?.querySelector<HTMLTextAreaElement>(
   "textarea[name=message]",
 );
+
+const FRIENDLY: Record<number, string> = {
+  400: "that didn't go through",
+  403: "verification failed, try again",
+  404: "that's gone",
+  429: "slow down, try again later",
+};
+
+const messageFor = (status: number): string =>
+  FRIENDLY[status] ?? "something went wrong";
+
+const setStatus = (text: string): void => {
+  if (statusEl) {
+    statusEl.textContent = text;
+  }
+};
 
 const updateCounter = (): void => {
   if (!counter || !messageField) {
@@ -36,31 +48,6 @@ const updateCounter = (): void => {
 messageField?.addEventListener("input", updateCounter);
 updateCounter();
 
-let token = "";
-let widgetId: string | undefined;
-let tokenResolve: ((value: string) => void) | null = null;
-
-const getToken = (): Promise<string> => {
-  if (token) {
-    return Promise.resolve(token);
-  }
-
-  const scope = window as unknown as { turnstile?: Turnstile };
-  if (!scope.turnstile || widgetId === undefined) {
-    return Promise.resolve("");
-  }
-
-  return new Promise((resolve) => {
-    tokenResolve = resolve;
-    scope.turnstile?.execute(widgetId);
-  });
-};
-
-const resetToken = (): void => {
-  token = "";
-  (window as unknown as { turnstile?: Turnstile }).turnstile?.reset(widgetId);
-};
-
 const formatDate = (value: string): string =>
   new Date(value).toLocaleDateString("en-US", {
     year: "numeric",
@@ -69,11 +56,10 @@ const formatDate = (value: string): string =>
   });
 
 const paintVote = (item: HTMLElement): void => {
-  const score = item.dataset.score ?? "0";
   const vote = Number(item.dataset.vote ?? "0");
   const scoreEl = item.querySelector<HTMLElement>(".gb-score");
   if (scoreEl) {
-    scoreEl.textContent = score;
+    scoreEl.textContent = item.dataset.score ?? "0";
   }
   item.classList.toggle("is-up", vote === 1);
   item.classList.toggle("is-down", vote === -1);
@@ -94,7 +80,7 @@ const renderEntry = (entry: Entry): HTMLElement => {
   up.className = "gb-vote-btn gb-up";
   up.dataset.vote = "1";
   up.setAttribute("aria-label", "upvote");
-  up.textContent = "\u25B2";
+  up.append(createElement(ChevronUp, { width: 15, height: 15 }));
 
   const score = document.createElement("span");
   score.className = "gb-score";
@@ -105,7 +91,7 @@ const renderEntry = (entry: Entry): HTMLElement => {
   down.className = "gb-vote-btn gb-down";
   down.dataset.vote = "-1";
   down.setAttribute("aria-label", "downvote");
-  down.textContent = "\u25BC";
+  down.append(createElement(ChevronDown, { width: 15, height: 15 }));
 
   vote.append(up, score, down);
 
@@ -140,33 +126,24 @@ const renderEntry = (entry: Entry): HTMLElement => {
     const reply = document.createElement("div");
     reply.className = "gb-reply";
 
-    const head = document.createElement("div");
-    head.className = "gb-reply-head";
-
+    const replyHead = document.createElement("div");
+    replyHead.className = "gb-reply-head";
     const label = document.createElement("span");
     label.className = "gb-reply-label";
     label.textContent = "lunynt";
-
-    head.append(label);
+    replyHead.append(label);
 
     const text = document.createElement("p");
     text.className = "gb-reply-text";
     text.textContent = entry.reply;
 
-    reply.append(head, text);
+    reply.append(replyHead, text);
     content.append(reply);
   }
 
   item.append(content, vote);
-
   paintVote(item);
   return item;
-};
-
-const setStatus = (text: string): void => {
-  if (statusEl) {
-    statusEl.textContent = text;
-  }
 };
 
 const load = async (): Promise<void> => {
@@ -194,54 +171,6 @@ const load = async (): Promise<void> => {
   }
 };
 
-if (captcha) {
-  const siteKey = captcha.dataset.siteKey ?? "";
-  const scope = window as unknown as {
-    turnstile?: Turnstile;
-    onTurnstileLoad?: () => void;
-  };
-
-  scope.onTurnstileLoad = () => {
-    if (!scope.turnstile) {
-      return;
-    }
-    widgetId = scope.turnstile.render(captcha, {
-      sitekey: siteKey,
-      theme: "dark",
-      execution: "execute",
-      appearance: "interaction-only",
-      callback: (value: string) => {
-        token = value;
-        if (tokenResolve) {
-          tokenResolve(value);
-          tokenResolve = null;
-        }
-      },
-      "expired-callback": () => {
-        token = "";
-        if (tokenResolve) {
-          tokenResolve("");
-          tokenResolve = null;
-        }
-      },
-      "error-callback": () => {
-        token = "";
-        if (tokenResolve) {
-          tokenResolve("");
-          tokenResolve = null;
-        }
-      },
-    });
-  };
-
-  const script = document.createElement("script");
-  script.src =
-    "https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad&render=explicit";
-  script.async = true;
-  script.defer = true;
-  document.head.appendChild(script);
-}
-
 list?.addEventListener("click", async (event) => {
   const button = (event.target as HTMLElement).closest<HTMLButtonElement>(
     ".gb-vote-btn",
@@ -251,39 +180,34 @@ list?.addEventListener("click", async (event) => {
   }
 
   const item = button.closest<HTMLElement>(".gb-entry");
-  if (!item) {
+  if (!item || !item.dataset.id) {
     return;
   }
 
-  const id = item.dataset.id;
   const clicked = Number(button.dataset.vote ?? "0");
   const current = Number(item.dataset.vote ?? "0");
   const next = current === clicked ? 0 : clicked;
 
   button.disabled = true;
-
   try {
-    const voteToken = await getToken();
+    const captcha = await askCaptcha();
     const response = await fetch("/api/guestbook/vote", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ id, value: next, token: voteToken }),
+      body: JSON.stringify({ id: item.dataset.id, value: next, captcha }),
     });
 
     const payload = (await response.json()) as {
       score?: number;
       my_vote?: number;
-      error?: string;
     };
 
     if (response.ok && typeof payload.score === "number") {
       item.dataset.score = String(payload.score);
       item.dataset.vote = String(payload.my_vote ?? next);
       paintVote(item);
-      resetToken();
-    } else if (payload.error) {
-      setStatus(payload.error);
-      resetToken();
+    } else {
+      setStatus(messageFor(response.status));
     }
   } catch {
     return;
@@ -311,20 +235,17 @@ form?.addEventListener("submit", async (event) => {
   setStatus("signing...");
 
   try {
-    const entryToken = await getToken();
+    const captcha = await askCaptcha();
     const response = await fetch("/api/guestbook", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ name, message, token: entryToken }),
+      body: JSON.stringify({ name, message, captcha }),
     });
 
-    const payload = (await response.json()) as {
-      entry?: Entry;
-      error?: string;
-    };
+    const payload = (await response.json()) as { entry?: Entry };
 
     if (!response.ok || !payload.entry) {
-      setStatus(payload.error ?? "something went wrong");
+      setStatus(messageFor(response.status));
       return;
     }
 
@@ -333,7 +254,6 @@ form?.addEventListener("submit", async (event) => {
       empty.hidden = true;
     }
     form.reset();
-    resetToken();
     updateCounter();
     setStatus("thanks for signing");
   } catch {

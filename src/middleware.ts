@@ -2,11 +2,9 @@ import { defineMiddleware } from "astro:middleware";
 
 const CSP = [
   "default-src 'self'",
-  "img-src 'self' data: https://challenges.cloudflare.com",
+  "img-src 'self' data:",
   "style-src 'self' 'unsafe-inline'",
-  "script-src 'self' https://challenges.cloudflare.com",
-  "frame-src https://challenges.cloudflare.com",
-  "connect-src 'self' https://challenges.cloudflare.com",
+  "script-src 'self'",
   "font-src 'self'",
   "frame-ancestors 'none'",
   "base-uri 'none'",

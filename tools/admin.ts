@@ -86,7 +86,7 @@ if (!username || !password) {
   process.exit(1);
 }
 
-const sql = postgres(url, { prepare: false, max: 1 });
+const sql = postgres(url, { prepare: false, max: 1, onnotice: () => {} });
 
 await sql`
   create table if not exists admins (

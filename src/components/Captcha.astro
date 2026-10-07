@@ -1,0 +1,20 @@
+---
+const siteKey =
+  (import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as string | undefined) ?? "";
+---
+
+{
+  siteKey && (
+    <lunynt-captcha data-site-key={siteKey} class="captcha-host" />
+  )
+}
+
+<script>
+  import "../scripts/captcha";
+</script>
+
+<style>
+  .captcha-host {
+    display: contents;
+  }
+</style>

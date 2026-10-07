@@ -2,8 +2,6 @@
 import Section from "./Section.astro";
 import { guestbook } from "../config";
 
-const siteKey =
-  (import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as string | undefined) ?? "";
 const enabled = guestbook.enabled;
 ---
 
@@ -31,9 +29,6 @@ const enabled = guestbook.enabled;
         <span class="gb-counter" data-guestbook-counter>
           0/{guestbook.maxMessage}
         </span>
-        {siteKey && (
-          <div class="gb-captcha" data-turnstile data-site-key={siteKey} />
-        )}
         <div class="gb-actions">
           <button class="gb-submit" type="submit">
             sign the guestbook

@@ -3,9 +3,9 @@ import { verifyCaptcha } from "../../../lib/captcha";
 import { databaseUrl, getSql } from "../../../lib/db";
 import { allow, hashIp } from "../../../lib/rate";
 import {
-  checkCredentials,
   isSecureRequest,
   sessionCookie,
+  verifyAdmin,
 } from "../../../lib/admin";
 
 export const prerender = false;
@@ -33,10 +33,14 @@ export const POST: APIRoute = async (context) => {
   }
 
   const ip = clientIp(context);
-
   const url = databaseUrl();
-  if (url) {
-    const sql = getSql(url);
+  if (!url) {
+    return context.redirect("/admin/login?error=1", 303);
+  }
+
+  const sql = getSql(url);
+
+  try {
     const allowed = await allow(
       sql,
       `admin-login:${hashIp(ip) ?? "unknown"}`,
@@ -46,9 +50,19 @@ export const POST: APIRoute = async (context) => {
     if (!allowed) {
       return context.redirect("/admin/login?error=1", 303);
     }
+  } catch {
+    return context.redirect("/admin/login?error=1", 303);
   }
 
-  if (!(await verifyCaptcha(token, ip)) || !checkCredentials(username, password)) {
+  if (!(await verifyCaptcha(token, ip))) {
+    return context.redirect("/admin/login?error=1", 303);
+  }
+
+  try {
+    if (!(await verifyAdmin(sql, username, password))) {
+      return context.redirect("/admin/login?error=1", 303);
+    }
+  } catch {
     return context.redirect("/admin/login?error=1", 303);
   }
 

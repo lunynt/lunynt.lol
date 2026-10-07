@@ -10,6 +10,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "assets": "node --experimental-strip-types tools/generate-assets.ts",
+    "admin:set": "node --env-file=.env.local --experimental-strip-types tools/admin.ts",
     "astro": "astro",
     "vercel": "vercel",
     "supabase": "supabase",

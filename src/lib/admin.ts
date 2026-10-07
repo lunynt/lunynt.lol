@@ -1,4 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
+import type { Sql } from "./db";
+import { verifyPassword } from "./password";
 
 const COOKIE = "lunynt_admin";
 const MAX_AGE = 60 * 60 * 24 * 7;
@@ -8,16 +10,25 @@ function env(name: string): string | undefined {
   return runtimeEnv[name] ?? process.env[name];
 }
 
-export function adminPassword(): string | undefined {
-  return env("ADMIN_PASSWORD");
-}
-
-export function adminUsername(): string | undefined {
-  return env("ADMIN_USERNAME");
-}
-
 export function adminSecret(): string | undefined {
-  return env("ADMIN_SECRET") ?? env("ADMIN_PASSWORD");
+  return env("ADMIN_SECRET");
+}
+
+export async function verifyAdmin(
+  sql: Sql,
+  username: string,
+  password: string,
+): Promise<boolean> {
+  if (!username || !password) {
+    return false;
+  }
+
+  const rows = await sql<{ password_hash: string }[]>`
+    select password_hash from admins where username = ${username} limit 1
+  `;
+
+  const stored = rows[0]?.password_hash;
+  return stored ? verifyPassword(password, stored) : false;
 }
 
 function sign(payload: string, secret: string): string {
@@ -31,15 +42,6 @@ function safeEqual(a: string, b: string): boolean {
     return false;
   }
   return timingSafeEqual(left, right);
-}
-
-export function checkCredentials(username: string, password: string): boolean {
-  const expectedUser = adminUsername();
-  const expectedPass = adminPassword();
-  if (!expectedUser || !expectedPass) {
-    return false;
-  }
-  return safeEqual(username, expectedUser) && safeEqual(password, expectedPass);
 }
 
 export function sessionCookie(secure: boolean): string | null {

@@ -1,19 +1,10 @@
 ---
-import { site, visitor } from "../config";
+import { site } from "../config";
 
 const year = new Date().getFullYear();
 ---
 
 <footer class="footer" data-reveal>
-  {
-    visitor.enabled && (
-      <p class="visitors" data-visitor-block hidden>
-        <span class="count" data-visitor-count>0</span>
-        <span>visits</span>
-      </p>
-    )
-  }
-
   <p class="colophon">
     <span>{year} {site.name}</span>
     <span class="sep" aria-hidden="true">·</span>
@@ -30,20 +21,6 @@ const year = new Date().getFullYear();
     gap: 0.5rem;
     justify-items: center;
     text-align: center;
-  }
-
-  .visitors {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.8rem;
-    color: var(--color-muted);
-  }
-
-  .count {
-    font-variant-numeric: tabular-nums;
-    color: var(--color-ink);
-    font-weight: 600;
   }
 
   .colophon {

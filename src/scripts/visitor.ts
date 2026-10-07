@@ -1,5 +1,4 @@
 const targets = document.querySelectorAll<HTMLElement>("[data-visitor-count]");
-const block = document.querySelector<HTMLElement>("[data-visitor-block]");
 
 const setCount = (element: HTMLElement, target: number): void => {
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -42,9 +41,6 @@ async function loadVisitorCount(): Promise<void> {
     if (typeof payload.count === "number") {
       const count = payload.count;
       targets.forEach((target) => setCount(target, count));
-      if (block) {
-        block.hidden = false;
-      }
     }
   } catch {
     return;

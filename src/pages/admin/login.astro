@@ -9,13 +9,15 @@ if (isAuthenticated(Astro.request)) {
 }
 
 const error = Astro.url.searchParams.has("error");
+const siteKey =
+  (import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as string | undefined) ?? "";
 ---
 
 <AdminLayout title="admin">
   <div class="admin-login">
     <h1>admin</h1>
     <p>lunynt.lol control panel</p>
-    <form method="POST" action="/api/admin/login" data-admin-login>
+    <form method="POST" action="/api/admin/login">
       <input
         class="admin-reply-input"
         type="text"
@@ -33,29 +35,23 @@ const error = Astro.url.searchParams.has("error");
         autocomplete="current-password"
         required
       />
+      {
+        siteKey && (
+          <div class="cf-turnstile" data-sitekey={siteKey} data-theme="dark" />
+        )
+      }
       {error && <span class="admin-error">sign in failed</span>}
       <button class="admin-btn" type="submit">sign in</button>
     </form>
+    {
+      siteKey && (
+        <script
+          is:inline
+          src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+          async
+          defer
+        />
+      )
+    }
   </div>
-
-  <script>
-    import { askCaptcha } from "../../scripts/captcha";
-
-    const form = document.querySelector<HTMLFormElement>("[data-admin-login]");
-
-    form?.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      try {
-        const captcha = await askCaptcha();
-        const input = document.createElement("input");
-        input.type = "hidden";
-        input.name = "captcha";
-        input.value = captcha;
-        form.append(input);
-        form.submit();
-      } catch {
-        return;
-      }
-    });
-  </script>
 </AdminLayout>

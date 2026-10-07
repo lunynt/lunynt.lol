@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { databaseUrl, getSql } from "../../lib/db";
-import { verifyChallenge } from "../../lib/challenge";
+import { verifyCaptcha } from "../../lib/captcha";
 import { allow, hashIp } from "../../lib/rate";
 import {
   createVoterId,
@@ -102,14 +102,14 @@ export const POST: APIRoute = async (context) => {
   const payload = parsed.value as {
     name?: unknown;
     message?: unknown;
-    captcha?: unknown;
+    token?: unknown;
   };
 
   const name =
     typeof payload.name === "string" ? sanitize(payload.name, false) : "";
   const message =
     typeof payload.message === "string" ? sanitize(payload.message, true) : "";
-  const captcha = typeof payload.captcha === "string" ? payload.captcha : "";
+  const token = typeof payload.token === "string" ? payload.token : "";
 
   if (
     name.length < 1 ||
@@ -149,8 +149,8 @@ export const POST: APIRoute = async (context) => {
     return fail(429, "ip rate limit", headers);
   }
 
-  if (!verifyChallenge(captcha)) {
-    return fail(403, "challenge failed", headers);
+  if (!(await verifyCaptcha(token, ip))) {
+    return fail(403, "captcha failed", headers);
   }
 
   try {

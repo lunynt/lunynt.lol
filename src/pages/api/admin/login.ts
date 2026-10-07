@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { verifyChallenge } from "../../../lib/challenge";
+import { verifyCaptcha } from "../../../lib/captcha";
 import { databaseUrl, getSql } from "../../../lib/db";
 import { allow, hashIp } from "../../../lib/rate";
 import {
@@ -21,13 +21,13 @@ function clientIp(context: { clientAddress?: string }): string | null {
 export const POST: APIRoute = async (context) => {
   let username = "";
   let password = "";
-  let captcha = "";
+  let token = "";
 
   try {
     const form = await context.request.formData();
     username = String(form.get("username") ?? "");
     password = String(form.get("password") ?? "");
-    captcha = String(form.get("captcha") ?? "");
+    token = String(form.get("cf-turnstile-response") ?? "");
   } catch {
     return context.redirect("/admin/login?error=1", 303);
   }
@@ -48,7 +48,7 @@ export const POST: APIRoute = async (context) => {
     }
   }
 
-  if (!verifyChallenge(captcha) || !checkCredentials(username, password)) {
+  if (!(await verifyCaptcha(token, ip)) || !checkCredentials(username, password)) {
     return context.redirect("/admin/login?error=1", 303);
   }
 

@@ -1,7 +1,6 @@
 ---
 import "@fontsource-variable/inter";
 import "../styles/global.css";
-import Captcha from "../components/Captcha.astro";
 import { site } from "../config";
 import { absoluteUrl, personJsonLd, websiteJsonLd } from "../lib/site";
 
@@ -100,7 +99,6 @@ const ogImage = absoluteUrl(image);
   </head>
   <body>
     <slot />
-    <Captcha />
     <img
       class="cursor"
       data-cursor

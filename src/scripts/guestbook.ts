@@ -1,4 +1,5 @@
 import { ChevronDown, ChevronUp, createElement } from "lucide";
+import { animate } from "motion";
 import { askCaptcha } from "./captcha";
 
 interface Entry {
@@ -12,6 +13,9 @@ interface Entry {
   reply?: string | null;
 }
 
+const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
+const POLL_MS = 15000;
+
 const form = document.querySelector<HTMLFormElement>("[data-guestbook-form]");
 const list = document.querySelector<HTMLElement>("[data-guestbook-list]");
 const empty = document.querySelector<HTMLElement>("[data-guestbook-empty]");
@@ -20,6 +24,14 @@ const counter = document.querySelector<HTMLElement>("[data-guestbook-counter]");
 const messageField = form?.querySelector<HTMLTextAreaElement>(
   "textarea[name=message]",
 );
+
+const items = new Map<string, HTMLElement>();
+
+const reduced = (): boolean =>
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+const desktop = (): boolean =>
+  window.matchMedia("(min-width: 768px)").matches;
 
 const FRIENDLY: Record<number, string> = {
   400: "that didn't go through",
@@ -48,12 +60,50 @@ const updateCounter = (): void => {
 messageField?.addEventListener("input", updateCounter);
 updateCounter();
 
+const animateIn = (element: HTMLElement, delay = 0): void => {
+  if (reduced()) {
+    return;
+  }
+  animate(
+    element,
+    { opacity: [0, 1], y: [-10, 0], scale: [0.985, 1] },
+    { duration: 0.45, delay, ease: EASE },
+  );
+};
+
+const animateOut = (element: HTMLElement): void => {
+  if (reduced()) {
+    element.remove();
+    return;
+  }
+  animate(
+    element,
+    { opacity: [1, 0], scale: [1, 0.97] },
+    { duration: 0.25, ease: EASE },
+  ).finished.then(() => element.remove());
+};
+
+const bump = (element: HTMLElement | null): void => {
+  if (!element || reduced()) {
+    return;
+  }
+  animate(element, { scale: [1, 1.28, 1] }, { duration: 0.32, ease: EASE });
+};
+
 const formatDate = (value: string): string =>
   new Date(value).toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
     day: "numeric",
   });
+
+const signature = (entry: Entry): string =>
+  [
+    entry.name,
+    entry.message,
+    entry.reply ?? "",
+    entry.pinned ? "1" : "0",
+  ].join("\u0000");
 
 const paintVote = (item: HTMLElement): void => {
   const score = item.dataset.score ?? "0";
@@ -72,6 +122,7 @@ const renderEntry = (entry: Entry): HTMLElement => {
   item.dataset.id = entry.id;
   item.dataset.score = String(entry.score ?? 0);
   item.dataset.vote = String(entry.my_vote ?? 0);
+  item.dataset.sig = signature(entry);
 
   const vote = document.createElement("div");
   vote.className = "gb-vote";
@@ -150,6 +201,83 @@ const renderEntry = (entry: Entry): HTMLElement => {
   return item;
 };
 
+const updateEntry = (element: HTMLElement, entry: Entry): HTMLElement => {
+  if (element.dataset.sig !== signature(entry)) {
+    const fresh = renderEntry(entry);
+    element.replaceWith(fresh);
+    return fresh;
+  }
+
+  const previous = element.dataset.score;
+  element.dataset.score = String(entry.score ?? 0);
+  element.dataset.vote = String(entry.my_vote ?? 0);
+  paintVote(element);
+
+  if (previous !== element.dataset.score) {
+    bump(element.querySelector<HTMLElement>(".gb-score"));
+  }
+
+  return element;
+};
+
+const syncEntries = (entries: Entry[], mode: "initial" | "live"): void => {
+  if (!list) {
+    return;
+  }
+
+  const animateInitial = mode === "initial" && !desktop();
+  const seen = new Set<string>();
+  let previous: HTMLElement | null = null;
+
+  entries.forEach((entry, index) => {
+    seen.add(entry.id);
+
+    const existing = items.get(entry.id);
+    let element = existing ?? null;
+
+    if (!element) {
+      element = renderEntry(entry);
+      items.set(entry.id, element);
+      if (previous) {
+        previous.after(element);
+      } else {
+        list.prepend(element);
+      }
+      if (mode === "live") {
+        animateIn(element);
+      } else if (animateInitial) {
+        animateIn(element, index * 0.03);
+      }
+    } else {
+      element = updateEntry(element, entry);
+      items.set(entry.id, element);
+      const inPlace = previous
+        ? previous.nextElementSibling === element
+        : list.firstElementChild === element;
+      if (!inPlace) {
+        if (previous) {
+          previous.after(element);
+        } else {
+          list.prepend(element);
+        }
+      }
+    }
+
+    previous = element;
+  });
+
+  items.forEach((element, id) => {
+    if (!seen.has(id)) {
+      items.delete(id);
+      animateOut(element);
+    }
+  });
+
+  if (empty) {
+    empty.hidden = entries.length > 0;
+  }
+};
+
 const load = async (): Promise<void> => {
   if (!list) {
     return;
@@ -164,15 +292,42 @@ const load = async (): Promise<void> => {
     }
 
     const payload = (await response.json()) as { entries?: Entry[] };
-    const entries = payload.entries ?? [];
-    list.textContent = "";
-    entries.forEach((entry) => list.appendChild(renderEntry(entry)));
-    if (empty) {
-      empty.hidden = entries.length > 0;
-    }
+    syncEntries(payload.entries ?? [], "initial");
   } catch {
     return;
   }
+};
+
+let polling = false;
+
+const refresh = async (): Promise<void> => {
+  if (polling || document.visibilityState !== "visible") {
+    return;
+  }
+
+  polling = true;
+  try {
+    const response = await fetch("/api/guestbook", {
+      headers: { accept: "application/json" },
+    });
+    if (response.ok) {
+      const payload = (await response.json()) as { entries?: Entry[] };
+      syncEntries(payload.entries ?? [], "live");
+    }
+  } catch {
+    return;
+  } finally {
+    polling = false;
+  }
+};
+
+const startPolling = (): void => {
+  window.setInterval(() => void refresh(), POLL_MS);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      void refresh();
+    }
+  });
 };
 
 list?.addEventListener("click", async (event) => {
@@ -219,6 +374,7 @@ list?.addEventListener("click", async (event) => {
       item.dataset.score = String(payload.score);
       item.dataset.vote = String(payload.my_vote ?? next);
       paintVote(item);
+      bump(item.querySelector<HTMLElement>(".gb-score"));
     } else {
       setStatus(messageFor(response.status));
     }
@@ -267,12 +423,17 @@ form?.addEventListener("submit", async (event) => {
 
     const payload = (await response.json()) as { entry?: Entry };
 
-    if (!response.ok || !payload.entry) {
+    if (!response.ok || !payload.entry || !list) {
       setStatus(messageFor(response.status));
       return;
     }
 
-    list?.prepend(renderEntry(payload.entry));
+    const entry = payload.entry;
+    const element = renderEntry(entry);
+    items.set(entry.id, element);
+    list.prepend(element);
+    animateIn(element);
+
     if (empty) {
       empty.hidden = true;
     }
@@ -288,6 +449,8 @@ form?.addEventListener("submit", async (event) => {
   }
 });
 
-load();
+if (list) {
+  void load().then(startPolling);
+}
 
 export {};

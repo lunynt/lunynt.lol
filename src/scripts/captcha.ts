@@ -138,6 +138,7 @@ class LunyntCaptcha extends HTMLElement {
           sitekey: siteKey,
           theme: "dark",
           appearance: "always",
+          size: "flexible",
           callback: (token: string) => this.#succeed(token),
           "error-callback": () => this.#fail(),
         });

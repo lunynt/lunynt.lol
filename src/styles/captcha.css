@@ -9,7 +9,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.25rem;
+  padding: 1rem;
   background-color: color-mix(in srgb, var(--color-canvas) 72%, transparent);
   opacity: 0;
   pointer-events: none;
@@ -22,8 +22,8 @@
 }
 
 .card {
-  width: min(22rem, 100%);
-  padding: 1.5rem;
+  width: min(24rem, 100%);
+  padding: 1.5rem 1.25rem;
   text-align: center;
   background-color: var(--color-surface);
   border: 1px solid var(--color-line-strong);
@@ -61,10 +61,13 @@
 }
 
 .widget {
-  display: flex;
-  justify-content: center;
+  width: 100%;
   min-height: 4rem;
   margin-top: 1.25rem;
+}
+
+.widget iframe {
+  width: 100% !important;
 }
 
 .btn {

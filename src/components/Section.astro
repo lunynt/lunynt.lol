@@ -1,0 +1,92 @@
+---
+interface Props {
+  title: string;
+  [key: string]: unknown;
+}
+
+const { title, ...rest } = Astro.props;
+const id = title
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, "-")
+  .replace(/^-+|-+$/g, "");
+---
+
+<section class="block card" id={id} data-reveal {...rest}>
+  <h2 class="block-title">
+    <a
+      class="block-hash"
+      href={`#${id}`}
+      data-hash
+      data-target={`#${id}`}
+      aria-label={`copy link to ${title}`}>#</a
+    >
+    <a class="block-link" href={`#${id}`}>{title}</a>
+  </h2>
+  <div class="block-body">
+    <slot />
+  </div>
+</section>
+
+<style>
+  .block {
+    padding: 1.5rem 1.75rem 1.75rem;
+    scroll-margin-top: 1.5rem;
+    transition:
+      border-color 320ms ease,
+      box-shadow 320ms ease;
+  }
+
+  .block.is-target {
+    border-color: color-mix(in srgb, var(--color-ink) 22%, var(--color-line));
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-ink) 7%, transparent);
+  }
+
+  .block-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .block-hash {
+    display: inline-flex;
+    align-items: center;
+    color: var(--color-ink);
+    font-weight: 600;
+    text-shadow: 0 0 10px
+      color-mix(in srgb, var(--color-ink) 45%, transparent);
+    transition:
+      color 140ms ease,
+      text-shadow 140ms ease;
+  }
+
+  .block-hash:hover {
+    text-shadow: 0 0 18px
+      color-mix(in srgb, var(--color-ink) 70%, transparent);
+  }
+
+  .block-hash:active {
+    color: color-mix(in srgb, var(--color-ink) 70%, #000);
+    text-shadow: 0 0 4px color-mix(in srgb, var(--color-ink) 25%, transparent);
+  }
+
+  .block-link {
+    color: var(--color-ink);
+    transition:
+      opacity 180ms ease,
+      transform 180ms ease,
+      filter 180ms ease;
+  }
+
+  .block-link.is-swapping {
+    opacity: 0;
+    transform: translateY(5px);
+    filter: blur(3px);
+  }
+
+  .block-body {
+    margin-top: 1rem;
+  }
+</style>

@@ -1,0 +1,194 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { site } from "../config";
+
+const updated = "October 2026";
+---
+
+<BaseLayout
+  title={`privacy · ${site.name}`}
+  description={`how ${site.name} handles data, visitors, and third-party services.`}
+>
+  <main class="page">
+    <article class="doc card" data-reveal>
+      <a class="back" href="/">← back</a>
+      <h1>privacy</h1>
+      <p class="updated">last updated {updated}</p>
+
+      <section>
+        <h2>overview</h2>
+        <p>
+          this site is a personal portfolio. it exists to show who {site.name}
+          is and what they build. it is designed to collect as little as
+          possible, and nothing here is used to build a profile of you.
+        </p>
+      </section>
+
+      <section>
+        <h2>visitor count</h2>
+        <p>
+          the home page shows a visitor count. each page view of the home page
+          sends one request to a counter that adds a single number to a running
+          total, stored as one integer row in a hosted postgres database
+          (supabase). the counter stores an aggregate integer only. it does not
+          store your IP address, browser, location, or any identifier that
+          could single you out. the number is not tied to you, and it cannot be
+          used to track you between pages or visits.
+        </p>
+        <p>
+          the site also keeps aggregate page view counts, grouped by day and by
+          path, so the owner can see which pages are visited in a private admin
+          dashboard. these are counts only and contain no personal data.
+        </p>
+      </section>
+
+      <section>
+        <h2>guestbook</h2>
+        <p>
+          the guestbook lets you leave a name and a message. when you submit,
+          that name and message are stored in the site database and shown
+          publicly on the home page, so do not include anything private. entries
+          can be upvoted or downvoted, and to stop one person from voting many
+          times the site stores one vote per entry against a salted hash of your
+          ip address. the raw ip is never stored, and the hash is used only to
+          prevent duplicate votes.
+        </p>
+      </section>
+
+      <section>
+        <h2>rate limits</h2>
+        <p>
+          to stop spam and abuse, the site limits how often you can post and
+          vote. those checks use the anonymous cookie id and a short lived,
+          salted hash of your ip address. the hash is used only to enforce the
+          limit, it is not reversible to your ip, and it is never linked to your
+          entries or votes.
+        </p>
+      </section>
+
+      <section>
+        <h2>cookies</h2>
+        <p>
+          the site sets one cookie, lunynt_vid. it is a random value stored on
+          your device so you cannot vote twice on the same entry and so the rate
+          limits work. it contains no personal data, is not used for tracking,
+          and lasts about two years.
+        </p>
+      </section>
+
+      <section>
+        <h2>captcha</h2>
+        <p>
+          posting and voting are protected by cloudflare turnstile. when you use
+          the guestbook, cloudflare serves a challenge script in your browser
+          and may see your ip address and basic request data to decide whether
+          you are human. turnstile does not use that data to track you across
+          sites. no data is stored by this site as part of the challenge.
+        </p>
+      </section>
+
+      <section>
+        <h2>discord presence</h2>
+        <p>
+          the currently section uses lanyard, a public service, to show the
+          owner's discord status. when you load the page, your browser requests
+          that public status from the lanyard api. lanyard may see your IP
+          address as part of serving that request, the same way any website you
+          contact would. no data about you is stored by this site as a result.
+        </p>
+      </section>
+
+      <section>
+        <h2>hosting</h2>
+        <p>
+          this site is hosted on vercel. like most hosts, vercel records
+          standard request logs to run and secure the service. those logs are
+          managed by vercel under their own policies and are not used by this
+          site for analytics.
+        </p>
+      </section>
+
+      <section>
+        <h2>what this site does not do</h2>
+        <p>
+          no accounts, no cookies, no advertising, no third-party analytics, no
+          cross-site tracking, and no fingerprinting. nothing is sold or shared.
+        </p>
+      </section>
+
+      <section>
+        <h2>changes</h2>
+        <p>
+          if this policy changes, the date at the top will be updated. continued
+          use of the site after a change means you accept the updated policy.
+        </p>
+      </section>
+
+      <section>
+        <h2>contact</h2>
+        <p>
+          for any question about this policy, reach out through the public
+          channels listed on the home page.
+        </p>
+      </section>
+    </article>
+  </main>
+</BaseLayout>
+
+<style>
+  .page {
+    min-height: 100dvh;
+    display: flex;
+    justify-content: center;
+    padding: 2.5rem 1.25rem;
+  }
+
+  .doc {
+    width: 100%;
+    max-width: 42rem;
+    align-self: start;
+    padding: 2rem 1.75rem 2.25rem;
+  }
+
+  .back {
+    display: inline-block;
+    font-size: 0.85rem;
+    color: var(--color-muted);
+    transition: color 160ms ease;
+  }
+
+  .back:hover {
+    color: var(--color-ink);
+  }
+
+  h1 {
+    margin-top: 1rem;
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: -0.035em;
+  }
+
+  .updated {
+    margin-top: 0.35rem;
+    color: var(--color-faint);
+    font-size: 0.85rem;
+  }
+
+  section {
+    margin-top: 1.75rem;
+  }
+
+  h2 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+  }
+
+  p {
+    margin-top: 0.55rem;
+    color: var(--color-muted);
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+</style>

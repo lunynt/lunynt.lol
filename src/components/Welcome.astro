@@ -1,0 +1,28 @@
+---
+import Section from "./Section.astro";
+---
+
+<Section title="welcome">
+  <div class="welcome">
+    <p class="welcome-line">glad to have you here, visitor</p>
+    <span class="welcome-count" data-visitor-count></span>
+  </div>
+</Section>
+
+<style>
+  .welcome {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.35rem;
+    color: var(--color-muted);
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .welcome-count {
+    color: var(--color-ink);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+</style>

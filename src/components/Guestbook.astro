@@ -1,0 +1,152 @@
+---
+import Section from "./Section.astro";
+import { guestbook } from "../config";
+
+const siteKey =
+  (import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as string | undefined) ?? "";
+const enabled = guestbook.enabled;
+---
+
+{
+  enabled && (
+    <Section title="guestbook" data-guestbook>
+      <form class="gb-form" data-guestbook-form>
+        <input
+          class="gb-input"
+          type="text"
+          name="name"
+          maxlength={guestbook.maxName}
+          placeholder="your name"
+          autocomplete="off"
+          required
+        />
+        <textarea
+          class="gb-input gb-textarea"
+          name="message"
+          maxlength={guestbook.maxMessage}
+          placeholder="leave a message"
+          rows="3"
+          required
+        />
+        <span class="gb-counter" data-guestbook-counter>
+          0/{guestbook.maxMessage}
+        </span>
+        {siteKey && (
+          <div class="gb-captcha" data-turnstile data-site-key={siteKey} />
+        )}
+        <div class="gb-actions">
+          <button class="gb-submit" type="submit">
+            sign the guestbook
+          </button>
+          <span class="gb-status" data-guestbook-status aria-live="polite" />
+        </div>
+      </form>
+
+      <ul class="gb-list" data-guestbook-list />
+
+      <p class="gb-empty" data-guestbook-empty hidden>
+        no entries yet. be the first to sign it.
+      </p>
+    </Section>
+  )
+}
+
+<script>
+  import "../scripts/guestbook";
+</script>
+
+<style>
+  .gb-form {
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .gb-input {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    background-color: var(--color-canvas);
+    border: 1px solid var(--color-line);
+    border-radius: 0.7rem;
+    color: var(--color-ink);
+    font-size: 0.9rem;
+    font-family: inherit;
+    transition:
+      border-color 160ms ease,
+      background-color 160ms ease;
+  }
+
+  .gb-input::placeholder {
+    color: var(--color-faint);
+  }
+
+  .gb-input:focus {
+    outline: none;
+    border-color: var(--color-line-strong);
+    background-color: var(--color-elevated);
+  }
+
+  .gb-textarea {
+    resize: vertical;
+    min-height: 4.5rem;
+  }
+
+  .gb-counter {
+    justify-self: end;
+    margin-top: -0.35rem;
+    color: var(--color-faint);
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .gb-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .gb-submit {
+    padding: 0.55rem 1.15rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-canvas);
+    background-color: var(--color-ink);
+    border: 1px solid var(--color-ink);
+    border-radius: 999px;
+    cursor: pointer;
+    transition:
+      opacity 160ms ease,
+      transform 140ms ease;
+  }
+
+  .gb-submit:hover {
+    opacity: 0.9;
+  }
+
+  .gb-submit:active {
+    transform: scale(0.97);
+  }
+
+  .gb-submit:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  .gb-status {
+    font-size: 0.8rem;
+    color: var(--color-muted);
+  }
+
+  .gb-list {
+    display: grid;
+    gap: 0.6rem;
+    margin-top: 1.25rem;
+    list-style: none;
+  }
+
+  .gb-empty {
+    margin-top: 1.25rem;
+    color: var(--color-muted);
+    font-size: 0.9rem;
+  }
+</style>

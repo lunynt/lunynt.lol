@@ -1,0 +1,43 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Intro from "../components/Intro.astro";
+import Profile from "../components/Profile.astro";
+import Welcome from "../components/Welcome.astro";
+import Currently from "../components/Currently.astro";
+import About from "../components/About.astro";
+import Projects from "../components/Projects.astro";
+import Guestbook from "../components/Guestbook.astro";
+import Footer from "../components/Footer.astro";
+---
+
+<BaseLayout>
+  <Intro />
+  <main class="page">
+    <div class="stack" data-intro-content>
+      <Profile />
+      <Welcome />
+      <Currently />
+      <About />
+      <Projects />
+      <Guestbook />
+      <Footer />
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .page {
+    min-height: 100dvh;
+    display: flex;
+    justify-content: center;
+    padding: 2.5rem 1.25rem 1rem;
+  }
+
+  .stack {
+    width: 100%;
+    max-width: 48rem;
+    display: grid;
+    align-content: start;
+    gap: 1rem;
+  }
+</style>

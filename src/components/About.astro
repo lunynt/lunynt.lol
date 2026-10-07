@@ -1,0 +1,23 @@
+---
+import Section from "./Section.astro";
+import { profile } from "../config";
+---
+
+<Section title="about">
+  <div class="about">
+    {profile.about.map((paragraph) => <p class="paragraph">{paragraph}</p>)}
+  </div>
+</Section>
+
+<style>
+  .about {
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  .paragraph {
+    color: var(--color-muted);
+    line-height: 1.7;
+    font-size: 1rem;
+  }
+</style>

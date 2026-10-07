@@ -1,0 +1,37 @@
+---
+import Section from "./Section.astro";
+import ProjectCard from "./ProjectCard.astro";
+import { projects as configProjects } from "../config";
+import { enrichProjects } from "../lib/github";
+
+const projects = await enrichProjects(configProjects);
+---
+
+<Section title="projects">
+  {
+    projects.length === 0 ? (
+      <p class="empty">no projects</p>
+    ) : (
+      <ul class="list">
+        {projects.map((project) => (
+          <li>
+            <ProjectCard project={project} />
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</Section>
+
+<style>
+  .list {
+    display: grid;
+    gap: 0.75rem;
+    list-style: none;
+  }
+
+  .empty {
+    color: var(--color-muted);
+    font-size: 0.95rem;
+  }
+</style>

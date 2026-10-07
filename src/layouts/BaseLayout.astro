@@ -1,0 +1,119 @@
+---
+import "@fontsource-variable/inter";
+import "../styles/global.css";
+import { site } from "../config";
+import { absoluteUrl, personJsonLd, websiteJsonLd } from "../lib/site";
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  noindex?: boolean;
+}
+
+const {
+  title = site.title,
+  description = site.description,
+  image = "/og.png",
+  noindex = false,
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, site.url).toString();
+const ogImage = absoluteUrl(image);
+---
+
+<!doctype html>
+<html lang={site.locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="theme-color" content={site.themeColor} />
+    <meta name="color-scheme" content="dark" />
+    <meta name="generator" content={Astro.generator} />
+    <meta
+      name="robots"
+      content={noindex
+        ? "noindex, nofollow"
+        : "index, follow, max-image-preview:large, max-snippet:-1"}
+    />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
+    <link rel="preconnect" href="https://api.lanyard.rest" crossorigin />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={site.description} />
+    <meta property="og:locale" content={site.locale} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(personJsonLd())}
+    />
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(websiteJsonLd())}
+    />
+
+    <script is:inline>
+      document.documentElement.classList.add("js");
+      var introSeen = false;
+      try {
+        introSeen = sessionStorage.getItem("intro-seen") === "1";
+      } catch (error) {
+        introSeen = false;
+      }
+      if (introSeen) {
+        document.documentElement.classList.add("intro-seen");
+      }
+      if (
+        !introSeen &&
+        !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ) {
+        document.documentElement.classList.add("intro-locked");
+      }
+      if (window.location.hash.length > 1) {
+        window.__pendingHash = window.location.hash;
+        window.history.replaceState(
+          null,
+          "",
+          window.location.pathname + window.location.search,
+        );
+      }
+    </script>
+  </head>
+  <body>
+    <slot />
+    <img
+      class="cursor"
+      data-cursor
+      src="/cursor.gif"
+      alt=""
+      aria-hidden="true"
+      draggable="false"
+      decoding="async"
+    />
+    <script>
+      import "../scripts/motion";
+      import "../scripts/visitor";
+      import "../scripts/lanyard-status";
+      import "../scripts/anchors";
+      import "../scripts/cursor";
+    </script>
+  </body>
+</html>

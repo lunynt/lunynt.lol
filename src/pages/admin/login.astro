@@ -1,0 +1,65 @@
+---
+export const prerender = false;
+
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { isAuthenticated } from "../../lib/admin";
+
+if (isAuthenticated(Astro.request)) {
+  return Astro.redirect("/admin");
+}
+
+const error = Astro.url.searchParams.get("error");
+const siteKey =
+  (import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as string | undefined) ?? "";
+---
+
+<AdminLayout title="admin">
+  <div class="admin-login">
+    <h1>admin</h1>
+    <p>lunynt.lol control panel</p>
+    <form method="POST" action="/api/admin/login">
+      <input
+        class="admin-reply-input"
+        type="text"
+        name="username"
+        placeholder="username"
+        autocomplete="username"
+        required
+        autofocus
+      />
+      <input
+        class="admin-reply-input"
+        type="password"
+        name="password"
+        placeholder="password"
+        autocomplete="current-password"
+        required
+      />
+      {
+        siteKey && (
+          <div class="cf-turnstile" data-sitekey={siteKey} data-theme="dark" />
+        )
+      }
+      {error === "captcha" && (
+        <span class="admin-error">captcha failed, try again</span>
+      )}
+      {error === "rate" && (
+        <span class="admin-error">too many attempts, try again later</span>
+      )}
+      {error === "1" && (
+        <span class="admin-error">wrong username or password</span>
+      )}
+      <button class="admin-btn" type="submit">sign in</button>
+    </form>
+    {
+      siteKey && (
+        <script
+          is:inline
+          src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+          async
+          defer
+        />
+      )
+    }
+  </div>
+</AdminLayout>

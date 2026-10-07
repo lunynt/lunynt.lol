@@ -1,0 +1,48 @@
+---
+import { intro } from "../config";
+---
+
+{
+  intro.enabled && (
+    <div class="intro" data-intro aria-hidden="true">
+      <div class="intro-inner">
+        {intro.lines.map((line) => (
+          <p class="intro-line" data-intro-line>
+            {line}
+          </p>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+<style>
+  .intro {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-canvas);
+    padding: 1.5rem;
+  }
+
+  .intro-inner {
+    text-align: center;
+    max-width: 40rem;
+  }
+
+  .intro-line {
+    font-size: clamp(1.6rem, 5vw, 2.75rem);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1.12;
+    color: var(--color-ink);
+    opacity: 0;
+  }
+
+  .intro-line + .intro-line {
+    margin-top: 0.5rem;
+    color: var(--color-muted);
+  }
+</style>

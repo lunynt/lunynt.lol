@@ -1,0 +1,78 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { site } from "../config";
+---
+
+<BaseLayout
+  title={`404 · ${site.name}`}
+  description="the page you are looking for does not exist."
+  noindex
+>
+  <main class="page">
+    <div class="box card">
+      <p class="code">404</p>
+      <h1>page not found</h1>
+      <p class="text">
+        the page you are looking for does not exist or has moved.
+      </p>
+      <a class="home" href="/">go home</a>
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .page {
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+  }
+
+  .box {
+    width: 100%;
+    max-width: 26rem;
+    padding: 2.25rem 1.75rem;
+    text-align: center;
+  }
+
+  .code {
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    color: var(--color-accent);
+  }
+
+  h1 {
+    margin-top: 0.75rem;
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+
+  .text {
+    margin-top: 0.6rem;
+    color: var(--color-muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .home {
+    display: inline-block;
+    margin-top: 1.5rem;
+    padding: 0.55rem 1.1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-ink);
+    border: 1px solid var(--color-line-strong);
+    border-radius: 999px;
+    transition:
+      background-color 160ms ease,
+      border-color 160ms ease;
+  }
+
+  .home:hover {
+    background-color: var(--color-elevated);
+    border-color: var(--color-muted);
+  }
+</style>

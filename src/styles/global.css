@@ -1,0 +1,350 @@
+@import "tailwindcss";
+
+@theme {
+  --color-canvas: #0a0a0b;
+  --color-surface: #131316;
+  --color-elevated: #1a1a1f;
+  --color-raised: #212129;
+  --color-line: #26262c;
+  --color-line-strong: #34343c;
+  --color-ink: #f4f4f5;
+  --color-muted: #9b9ba4;
+  --color-faint: #6b6b74;
+  --color-accent: #a78bfa;
+  --color-down: #6b8afd;
+  --color-online: #3ba55d;
+  --color-idle: #faa81a;
+  --color-dnd: #ed4245;
+  --color-offline: #747f8d;
+
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
+
+  --radius-card: 1.25rem;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+@layer utilities {
+  .card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+  }
+
+  .hairline {
+    background-color: var(--color-line);
+  }
+}
+
+[data-intro] {
+  display: none;
+}
+
+html.js [data-intro] {
+  display: flex;
+}
+
+html.intro-seen [data-intro] {
+  display: none;
+}
+
+html.intro-locked [data-intro-content] {
+  opacity: 0;
+}
+
+html.js [data-reveal] {
+  opacity: 0;
+}
+
+.reveal-word {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding-bottom: 0.16em;
+  margin-bottom: -0.16em;
+}
+
+.reveal-word-inner {
+  display: inline-block;
+  transform: translateY(110%);
+  will-change: transform;
+}
+
+html.intro-locked {
+  overflow: hidden;
+}
+
+.banner-grid {
+  position: absolute;
+  inset: 0;
+}
+
+.banner-tile {
+  position: absolute;
+  width: calc(100% + 2px);
+  height: calc(100% + 2px);
+  transform-origin: center;
+}
+
+.banner-tile img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.gb-entry {
+  display: flex;
+  align-items: stretch;
+  gap: 0.9rem;
+  padding: 0.85rem 1rem;
+  background-color: var(--color-canvas);
+  border: 1px solid var(--color-line);
+  border-radius: 1rem;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.gb-entry:hover {
+  border-color: var(--color-line-strong);
+}
+
+.gb-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.gb-entry-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.gb-entry-name {
+  color: var(--color-ink);
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: -0.01em;
+}
+
+.gb-entry-date {
+  color: var(--color-faint);
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.gb-entry-message {
+  margin-top: 0.35rem;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.gb-pin {
+  margin-left: 0.35rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-line-strong);
+  color: var(--color-faint);
+  font-size: 0.62rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  vertical-align: middle;
+}
+
+.gb-reply {
+  margin-top: 0.7rem;
+  padding: 0.6rem 0.8rem;
+  background-color: var(--color-elevated);
+  border: 1px solid var(--color-line);
+  border-radius: 0.7rem;
+}
+
+.gb-reply-head {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.gb-reply-label {
+  color: var(--color-ink);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.gb-reply-text {
+  margin-top: 0.3rem;
+  color: var(--color-muted);
+  font-size: 0.88rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.gb-vote {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  flex: none;
+  padding-left: 0.9rem;
+  border-left: 1px solid var(--color-line);
+}
+
+.gb-vote-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border: none;
+  border-radius: 0.5rem;
+  background-color: transparent;
+  color: var(--color-faint);
+  font-size: 0.72rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color 140ms ease,
+    background-color 140ms ease,
+    transform 140ms ease;
+}
+
+.gb-vote-btn:hover {
+  color: var(--color-ink);
+  background-color: var(--color-elevated);
+}
+
+.gb-vote-btn:active {
+  transform: scale(0.88);
+}
+
+.gb-vote-btn:disabled {
+  opacity: 0.5;
+}
+
+.gb-score {
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-muted);
+}
+
+.gb-entry.is-up .gb-up {
+  color: var(--color-accent);
+}
+
+.gb-entry.is-down .gb-down {
+  color: var(--color-down);
+}
+
+.gb-entry.is-up .gb-score {
+  color: var(--color-accent);
+}
+
+.gb-entry.is-down .gb-score {
+  color: var(--color-down);
+}
+
+.cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 32px;
+  height: 32px;
+  z-index: 9999;
+  display: none;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  opacity: 0;
+  transform: translate3d(-100px, -100px, 0);
+  transition: opacity 180ms ease;
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.9))
+    drop-shadow(0 0 10px rgba(167, 139, 250, 0.6));
+}
+
+.cursor.is-visible {
+  opacity: 1;
+}
+
+@media (pointer: fine) {
+  * {
+    cursor: none !important;
+  }
+
+  .cursor {
+    display: block;
+  }
+}
+
+@media (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .cursor.is-visible {
+    animation: cursor-glow 2400ms ease-in-out infinite;
+  }
+}
+
+@keyframes cursor-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.85))
+      drop-shadow(0 0 10px rgba(167, 139, 250, 0.55));
+  }
+
+  50% {
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 1))
+      drop-shadow(0 0 18px rgba(167, 139, 250, 0.85));
+  }
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-canvas);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-line-strong);
+  border-radius: 999px;
+  border: 2px solid var(--color-canvas);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

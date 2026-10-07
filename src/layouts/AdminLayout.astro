@@ -1,0 +1,35 @@
+---
+import "../styles/global.css";
+import "../styles/admin.css";
+
+interface Props {
+  title?: string;
+}
+
+const { title = "admin" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title} · lunynt</title>
+  </head>
+  <body class="admin-body">
+    <slot />
+    <img
+      class="cursor"
+      data-cursor
+      src="/cursor.gif"
+      alt=""
+      aria-hidden="true"
+      draggable="false"
+      decoding="async"
+    />
+    <script>
+      import "../scripts/cursor";
+    </script>
+  </body>
+</html>

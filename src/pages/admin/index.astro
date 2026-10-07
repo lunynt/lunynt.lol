@@ -1,0 +1,49 @@
+---
+export const prerender = false;
+
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { isAuthenticated } from "../../lib/admin";
+
+if (!isAuthenticated(Astro.request)) {
+  return Astro.redirect("/admin/login");
+}
+---
+
+<AdminLayout title="dashboard">
+  <div class="admin-wrap">
+    <header class="admin-bar">
+      <div>
+        <p class="admin-title">dashboard</p>
+        <p class="admin-sub">lunynt.lol</p>
+      </div>
+      <form method="POST" action="/api/admin/logout">
+        <button class="admin-btn" type="submit">log out</button>
+      </form>
+    </header>
+
+    <div class="admin-grid" data-admin-stats></div>
+
+    <section class="admin-section">
+      <p class="admin-section-title">page views, last 14 days</p>
+      <div class="admin-card">
+        <div class="admin-bars" data-admin-bars></div>
+      </div>
+    </section>
+
+    <section class="admin-section">
+      <p class="admin-section-title">top paths, last 30 days</p>
+      <div class="admin-card">
+        <div class="admin-paths" data-admin-paths></div>
+      </div>
+    </section>
+
+    <section class="admin-section">
+      <p class="admin-section-title">guestbook</p>
+      <div class="admin-list" data-admin-entries></div>
+    </section>
+  </div>
+
+  <script>
+    import "../../scripts/admin";
+  </script>
+</AdminLayout>

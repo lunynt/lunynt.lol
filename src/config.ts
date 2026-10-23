@@ -87,7 +87,7 @@ export const site: SiteConfig = {
     },
     {
       label: "discord",
-      href: "https://discord.gg/fGepBdxTbw",
+      href: "https://discord.gg/6P6jwWuGR",
       icon: "simple-icons:discord",
     },
   ],
